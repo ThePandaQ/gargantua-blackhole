@@ -36,6 +36,10 @@ const files = walk(ROOT).filter((f) => !f.includes(join('vendor', 'three')));
 let problems = 0;
 let edges = 0;
 
+/* Every module that ships must be reachable from an entry point, or it is dead
+   code that will never be treeshaken because nothing bundles this project. */
+const ENTRIES = ['index.html', 'tests/harness.html', 'tests/glslcompile.html'];
+
 for (const file of files) {
   const src = readFileSync(file, 'utf8');
   const specs = new Set();

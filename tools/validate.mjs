@@ -189,9 +189,11 @@ function checkProject() {
     'vendor/three/three.module.js',
     'vendor/three/addons/controls/OrbitControls.js',
     'src/main.js', 'src/config.js', 'src/state.js',
+    'src/i18n/index.js',
     'src/render/pipeline.js', 'src/render/governor.js',
     'src/camera/rig.js', 'src/ui/hud.js', 'src/audio/ambient.js',
     'src/shaders/geodesic.js', 'src/shaders/scene.js', 'src/shaders/post.js',
+    'src/shaders/common.js',
   ];
   const missing = must.filter((f) => !existsSync(resolve(ROOT, f)));
   if (!missing.length) ok(`all ${must.length} required files present`);

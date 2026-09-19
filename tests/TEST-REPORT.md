@@ -101,10 +101,30 @@ Chrome DevTools Protocol over a raw `node:net` WebSocket. Frames are driven by
 `--dump-dom` fires before the shaders finish compiling.
 
 ```
-94/94 in-page checks passed in 8.8s
- 0 browser-level console errors / exceptions / warnings
+120/120 in-page checks passed in 10.4s
+  0 browser-level console errors / exceptions / warnings
 14/14 screenshots written
 ```
+
+<details>
+<summary>Interface assertions (folding and language)</summary>
+
+| check | measured |
+|---|---|
+| parameter groups built, each with a fold toggle | 4 / 4 |
+| per-group slider counts sum to the table | 6+6+5+4 = 21 |
+| clicking a header folds, clicking again unfolds | pass |
+| `E` folds every group at once | pass |
+| group bodies clipped to zero height | `0px 0px 0px 0px` |
+| folded slider area / panel height | 68 px / 160 px (open: 562 px) |
+| telemetry stays visible while folded | pass |
+| the button flips to "expand" | `EXPAND ALL` |
+| `L` translates all 21 parameter labels | 21/21 |
+| group titles, headings, quality, presets, debug label, telemetry | all translated |
+| `documentElement.lang` follows | `en` → `zh-CN` → `en` |
+| language persists to localStorage | pass |
+
+</details>
 
 <details>
 <summary>Physics assertions (the part that matters)</summary>
@@ -222,8 +242,8 @@ cores, exactly as a starfield should measure.
 
 ## 6. Defects found and fixed
 
-Twenty-one, all found by the suite or by a user, and all fixed. The ones worth
-naming:
+Twenty-four, all found by the suite, by a user, or by the interface work, and all
+fixed. The ones worth naming:
 
 * **Near-horizon step size.** With the disc hidden the step limiter relaxed, and
   rays with `b` marginally above `b_crit` were walked across the horizon instead
@@ -250,6 +270,26 @@ naming:
   compositor has taken the frame, so the documented capture interface usually won
   that race and occasionally did not. In the automation path only, the buffer is
   now preserved.
+
+### Found while adding Chinese and the foldable groups
+
+22. **`?collapse=1` had no effect.** `loadState()` ran *after* the URL overrides
+    and overwrote the folding with the persisted value. The override order is now
+    stated in one place, and an empty store no longer reports every group as
+    expanded before the first load.
+23. **Changing language left the telemetry panel in the old language.** The panel
+    is rebuilt from a stats sample that only arrives with a rendered frame, and
+    the render loop is often idle by then. The sample is now cached and the panel
+    redrawn on a language change.
+24. **`tests/harness.html` was a hand-maintained copy of `index.html` and had
+    silently drifted** — it was missing the folding and language controls, so the
+    new interface checks crashed on elements that were never there. It is now
+    generated from `index.html` by `tools/build-site.mjs`, which makes that class
+    of drift structurally impossible; `--check` fails if the two disagree.
+25. **`.pgroup-title` was defined twice in `style.css`** and the second copy —
+    carrying a fixed `margin: 4px 0 7px` — overrode the fold's own spacing, so a
+    folded panel measured 301 px instead of 160 px. Both definitions were
+    individually valid; the duplicate selector was the bug.
 
 The rest were load failures, GLSL ES 3.00 migration errors, a texture bound
 before three.js realised it, a probe that left a render target bound,

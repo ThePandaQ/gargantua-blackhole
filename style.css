@@ -96,10 +96,13 @@ body { touch-action: none; }
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  gap: 12px;
   pointer-events: none;
   min-height: 0;
 }
 .hud-top > * { pointer-events: auto; }
+
+.top-actions { display: flex; gap: 6px; flex: 0 0 auto; }
 
 .hud-col {
   grid-row: 2;
@@ -154,6 +157,87 @@ body { touch-action: none; }
 
 .panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .panel-head h2 { margin-bottom: 9px; }
+.head-actions { display: flex; gap: 5px; flex: 0 0 auto; }
+
+/* ------------------------- folding the groups ------------------------- *
+   Collapsing is not hiding: the group header stays, with its slider count, so
+   the panel remains a usable index. The body animates shut on a grid row so it
+   works without measuring anything in JavaScript. */
+.pgroup-title {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  padding: 5px 2px 4px;
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  opacity: 0.9;
+  transition: background 140ms ease, color 140ms ease;
+}
+/* the rule that fills the row is drawn by the count pill instead of a ::after,
+   so a folded header stays a single compact line */
+.pgroup.collapsed .pgroup-title { padding: 3px 2px; }
+.pgroup-title:hover { background: rgba(255, 180, 106, 0.07); }
+.pgroup-title:focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; }
+.pgroup-title .chev {
+  width: 0; height: 0;
+  border-left: 4px solid currentColor;
+  border-top: 3.5px solid transparent;
+  border-bottom: 3.5px solid transparent;
+  transform: rotate(90deg);
+  transition: transform 180ms ease;
+  flex: 0 0 auto;
+  opacity: 0.75;
+}
+.pgroup.collapsed .pgroup-title .chev { transform: rotate(0deg); }
+.pgroup-title .gname { flex: 0 1 auto; }
+.pgroup-title .gcount {
+  font-size: 8px; letter-spacing: 0.08em;
+  color: var(--ink-mute);
+  border: 1px solid var(--line-soft);
+  border-radius: 99px;
+  padding: 0 5px;
+  flex: 0 0 auto;
+}
+
+/* max-height rather than a 0fr grid row: the body holds many rows, and a grid
+   trick only collapses cleanly around a single child. The cap is generous
+   enough for the largest group (6 sliders ≈ 260 px) and is only an animation
+   target — the real height is content-driven. */
+.pgroup-body {
+  overflow: hidden;
+  max-height: 400px;
+  opacity: 1;
+  margin-top: 6px;
+  transition: max-height 240ms ease, opacity 180ms ease, margin-top 240ms ease;
+}
+.pgroup.collapsed .pgroup-body {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+}
+
+.panel-foot {
+  display: flex; flex-wrap: wrap; gap: 4px 12px;
+  margin-top: 9px; padding-top: 8px;
+  border-top: 1px solid var(--line-soft);
+  font-family: var(--mono); font-size: 8px;
+  letter-spacing: 0.06em; color: var(--ink-mute);
+}
+.panel-foot .hint { display: inline-flex; align-items: center; gap: 4px; }
+.panel-foot kbd {
+  font: inherit; color: var(--ink-dim);
+  border: 1px solid var(--line-soft); border-radius: 2px; padding: 0 3px;
+}
+/* with every group folded the panel shrinks to its index, so let it hug content */
+body.all-collapsed #paramPanel { flex: 0 0 auto; }
 
 .pill {
   border: 1px solid var(--line);
@@ -229,14 +313,10 @@ body { touch-action: none; }
 .sliders::-webkit-scrollbar-thumb { background: rgba(255, 180, 106, 0.22); border-radius: 99px; }
 .sliders:hover::-webkit-scrollbar-thumb { background: rgba(255, 180, 106, 0.42); }
 
-.pgroup { margin-bottom: 11px; }
-.pgroup-title {
-  display: flex; align-items: center; gap: 8px;
-  font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.2em;
-  color: var(--accent); opacity: 0.85; margin: 4px 0 7px;
-}
-.pgroup-title::after { content: ""; flex: 1; height: 1px; background: var(--line-soft); }
-
+/* .pgroup / .pgroup-title / .pgroup-body live in the folding block above.
+   They were duplicated here once, and the copy silently overrode the fold's
+   margin and padding — a reminder that a second definition of the same
+   selector is a bug even when both are "valid". */
 .prow { margin-bottom: 7px; }
 .phead { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; margin-bottom: 2px; }
 .plabel { font-size: 9.5px; color: var(--ink-dim); letter-spacing: 0.02em; cursor: pointer; }

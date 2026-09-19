@@ -52,6 +52,10 @@ window.addEventListener('unhandledrejection', (e) => {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/* DOM shorthands — the interface checks below read a lot of nodes */
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
 /* ------------------------------------------------------------------ */
 /* image measurement                                                   */
 /* ------------------------------------------------------------------ */
@@ -827,6 +831,111 @@ function render(frames = 3, dtMs = 16.7) {
     })());
   G.setQuality('high');
   G.setDebug(0);
+
+  /* ---------------- interface: folding ---------------- */
+  const groupEls = $$('#paramSliders .pgroup');
+  rec('four parameter groups are built', groupEls.length === 4, groupEls.length);
+  rec('every group has a fold toggle', $$('#paramSliders .pgroup-title').length === 4);
+  rec('the per-group slider count matches the table',
+    groupEls.reduce((n, g) => n + $$('.prow', g).length, 0) === 21,
+    groupEls.map((g) => $$('.prow', g).length).join('+'));
+
+  const firstGroup = groupEls[0];
+  const wasCollapsed = firstGroup.classList.contains('collapsed');
+  $('.pgroup-title', firstGroup).click();
+  await sleep(60);
+  const toggled = firstGroup.classList.contains('collapsed') !== wasCollapsed;
+  rec('clicking a group header folds it', toggled,
+    wasCollapsed + ' -> ' + firstGroup.classList.contains('collapsed'));
+  $('.pgroup-title', firstGroup).click();
+  await sleep(60);
+  rec('clicking again unfolds it', firstGroup.classList.contains('collapsed') === wasCollapsed);
+
+  /* the point of the feature: fold everything, keep the readouts */
+  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'e', bubbles: true }));
+  /* the fold is a 240 ms CSS transition, so measuring immediately reads a
+     half-collapsed panel — wait it out rather than asserting on a tween */
+  await sleep(420);
+  const allFolded = $$('#paramSliders .pgroup').every((g) => g.classList.contains('collapsed'));
+  rec('hotkey E folds every group at once', allFolded);
+  rec('folding keeps the group headers visible',
+    $$('#paramSliders .pgroup-title').filter((h) => h.getBoundingClientRect().height > 4).length === 4);
+  /* A clipped descendant still reports a layout rect, so "is it visible" has to
+     be asked of the element that actually clips: the group body. Its computed
+     max-height is the thing the fold changes, and the panel's total height is
+     the user-visible consequence. */
+  const bodies = $$('#paramSliders .pgroup-body');
+  const collapsedHeights = bodies.map((b) => getComputedStyle(b).maxHeight);
+  rec('every group body is clipped to zero height',
+    collapsedHeights.every((h) => h === '0px'), collapsedHeights.join(' '));
+  rec('folding keeps the telemetry panel',
+    document.getElementById('stats').getBoundingClientRect().height > 20);
+  rec('the fold button flips to "expand"',
+    /EXPAND|展开/.test(document.getElementById('collapseBtn').textContent),
+    document.getElementById('collapseBtn').textContent.trim());
+  const panelH = document.getElementById('paramPanel').getBoundingClientRect().height;
+  const slidersH = document.getElementById('paramSliders').getBoundingClientRect().height;
+  /* Four group headers are ~68 px even fully folded — that is the index the
+     feature is supposed to keep. What matters is that the sliders themselves
+     are gone and the panel is a fraction of its open height. */
+  rec('folding reclaims the slider area', slidersH < 90, 'slider area ' + Math.round(slidersH) + ' px');
+  rec('the folded panel is compact', panelH < 220, Math.round(panelH) + ' px');
+
+  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'e', bubbles: true }));
+  await sleep(420);
+  rec('hotkey E unfolds everything again',
+    $$('#paramSliders .pgroup').every((g) => !g.classList.contains('collapsed')));
+  const panelH2 = document.getElementById('paramPanel').getBoundingClientRect().height;
+  rec('the unfolded panel is taller than the folded one', panelH2 > panelH + 60,
+    Math.round(panelH) + ' -> ' + Math.round(panelH2) + ' px');
+
+  /* ---------------- interface: language ---------------- */
+  const zhCount = (s) => (s.match(/[\u4e00-\u9fff]/g) || []).length;
+  const enSnapshot = {
+    params: $('#paramSliders .plabel').textContent,
+    tier: document.querySelector('#qualityGroup button').textContent,
+    preset: document.querySelector('#presetGroup button').textContent,
+    debug: document.getElementById('debugLabel').textContent,
+    heading: document.querySelector('#paramPanel h2').textContent,
+  };
+  rec('the default interface is English', zhCount(enSnapshot.heading) === 0, enSnapshot.heading.trim());
+
+  document.getElementById('langBtn').click();
+  await sleep(200);
+  rec('the language button switches to Chinese',
+    $$('#paramSliders .plabel').filter((l) => zhCount(l.textContent) > 0).length === 21,
+    $$('#paramSliders .plabel').filter((l) => zhCount(l.textContent) > 0).length + '/21 labels translated');
+  rec('panel headings are translated', zhCount(document.querySelector('#paramPanel h2').textContent) > 0,
+    document.querySelector('#paramPanel h2').textContent.trim());
+  rec('quality buttons are translated',
+    document.querySelector('#qualityGroup button').textContent !== enSnapshot.tier,
+    enSnapshot.tier + ' -> ' + document.querySelector('#qualityGroup button').textContent);
+  rec('view preset buttons are translated',
+    document.querySelector('#presetGroup button').textContent !== enSnapshot.preset,
+    document.querySelector('#presetGroup button').textContent.trim());
+  rec('debug label is translated',
+    document.getElementById('debugLabel').textContent !== enSnapshot.debug,
+    document.getElementById('debugLabel').textContent.trim());
+  rec('the document language is declared',
+    document.documentElement.lang.startsWith('zh'), document.documentElement.lang);
+  rec('the boot/telemetry strings are translated',
+    zhCount(document.getElementById('stats').textContent) > 0,
+    document.getElementById('stats').textContent.replace(/\s+/g, ' ').trim().slice(0, 60));
+  rec('the group titles are translated',
+    $$('#paramSliders .gname').every((g) => zhCount(g.textContent) > 0));
+
+  /* saveState is debounced by 220 ms so slider drags do not thrash localStorage */
+  await sleep(420);
+  rec('language choice is persisted',
+    (JSON.parse(localStorage.getItem('gargantua.schwarzschild.v1') || '{}').lang) === 'zh');
+
+  document.getElementById('langBtn').click();
+  await sleep(200);
+  rec('switching back restores English',
+    $('#paramSliders .plabel').textContent === enSnapshot.params,
+    $('#paramSliders .plabel').textContent);
+  rec('the document language follows back',
+    document.documentElement.lang === 'en', document.documentElement.lang);
 
   /* ---------------- telemetry text ---------------- */
   render(3);

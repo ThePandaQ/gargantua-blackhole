@@ -174,16 +174,34 @@ Nothing is approximated: no weak-field expansion, no screen-space fudge.
 
 ## 3. Interface
 
+**Two languages.** English and Simplified Chinese, switchable with the `中文` /
+`EN` button in the top-right or the `L` key, persisted, and also settable by URL:
+`?lang=zh`. Everything is translated — the 21 parameter labels, the four group
+headings, the view presets, the ten debug views, all telemetry rows, the toasts,
+the help overlay, the startup and context-loss messages, and the boot guard.
+`node tools/i18n-audit.mjs` enforces that: a missing key, a key that exists in
+one language only, a placeholder that differs between languages, or a config
+entry with no Chinese label all fail the suite.
+
+**Foldable parameter groups.** Each group header is a toggle, and `E` (or the
+button in the panel header) folds them all at once — the point being that you can
+dial in a look and then give the render the whole screen while keeping every
+readout. A folded group keeps its header and slider count, so the panel stays a
+usable index: open 562 px, folded 160 px. The folding state persists, and
+`?collapse=1` folds everything from a link.
+
 **HUD** — telemetry (frame time, buffer size, scale, tier, steps/ray, camera,
 mode), 21 live sliders, 4 view presets, 3 quality tiers, 10 debug views.
 
 | key | action |
 |---|---|
-| `1` `2` `3` `4` | photon ring / cinematic / ISCO dive / polar sweep |
+| `1` `2` `3` `4` | photon ring / cinematic / beaming / polar sweep |
 | `V` `N` · `←` `→` | cycle view presets |
 | `C` | cinematic camera loop (84 s, 7 keyframed shots, seamless) |
 | `0`–`9` | debug view |
 | `H` | hide the whole HUD |
+| `E` | fold / unfold every parameter group |
+| `L` | switch interface language |
 | `Q` | cycle quality tier · `A` toggle auto |
 | `M` | ambient score · `P` download PNG · `F` fullscreen |
 | `R` | reset every parameter · `?` keyboard reference |
@@ -283,6 +301,8 @@ index.html?shot=1&ui=0&cinematic=0&t=12&w=3840&h=2160&preset=ring&quality=cinema
 | `cinematic=0` | disable the autonomous camera |
 | `animate=0` | freeze the simulation clock entirely |
 | `debug=<0-9>` | pick a debug view; **otherwise a shot always renders view 0** |
+| `lang=en\|zh` | interface language |
+| `collapse=1` | fold every parameter group |
 
 A capture request never inherits the diagnostic view someone left switched on in
 `localStorage`, and it enables `preserveDrawingBuffer` so `toDataURL()` cannot
@@ -344,14 +364,16 @@ AMD Radeon RX 6800 XT**.
 
 ```bash
 node tools/validate.mjs       # 59 static checks: GLSL structure, uniform wiring, project invariants
-node tools/checkimports.mjs   # 58 import edges incl. importmap prefix resolution
+node tools/i18n-audit.mjs     # translation completeness, parity, placeholders, orphans
+node tools/checkimports.mjs   # 81 import edges incl. importmap prefix resolution
 node tools/shadow-theory.mjs  # independent RK4 verification of the shadow geometry
 node tools/glslcheck.mjs      # compiles every shader on the real driver
-node tools/bootcheck.mjs <url>  # does it open? boot state, console, failed requests
-node tools/acceptance.mjs     # 94 in-page checks + console/exception capture
-node tools/acceptance.mjs --shots   # ...plus a 15-frame screenshot gallery
+node tools/bootcheck.mjs <url>  # does it actually open? boot state, console, failed requests
+node tools/acceptance.mjs     # 120 in-page checks + console/exception capture
+node tools/acceptance.mjs --shots   # ...plus the screenshot gallery
 node tools/imgstat.mjs        # objective grade statistics for the captures
 node tools/shot.mjs <url> <out.png> # screenshot any URL, DOM included
+node tools/build-site.mjs     # stage docs/ and regenerate the harness page
 ```
 
 `tools/acceptance.mjs` speaks the Chrome DevTools Protocol directly over a raw
@@ -363,10 +385,11 @@ Frames are therefore driven through `GARGANTUA.step()`.
 
 ```
 59/59   static validation
-58/58   import edges resolve
+81/81   import edges resolve
  ok     shadow geometry cross-check (0.00e+0 % worst deviation)
  6/6    shaders compile on ANGLE/D3D11
-94/94   in-page acceptance checks
+ ok     interface fully translated (i18n audit)
+120/120 in-page acceptance checks
   0     browser console errors / exceptions / warnings
 15/15   screenshots written
 ```

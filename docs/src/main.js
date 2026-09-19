@@ -22,6 +22,7 @@ import {
 import {
   PARAM_DEFS, DEFAULT_PARAMS, QUALITY_TIERS, VIEW_PRESETS, DEBUG_MODES,
 } from './config.js';
+import { t, isZh, applyI18n, missingTranslations } from './i18n/index.js';
 import { BlackHolePipeline } from './render/pipeline.js';
 import { Governor } from './render/governor.js';
 import { CameraRig } from './camera/rig.js';
@@ -42,18 +43,29 @@ const fatalEl = $('#fatal');
 /* the inline guard in index.html would otherwise fire 15 s in and tell the user
    the app had stalled, when in fact it booted fine */
 clearTimeout(window.__GARGANTUA_BOOT_TIMER__);
-/* and now that modules are demonstrably loading, say what we are actually doing */
-if (bootLog) bootLog.textContent = 'compiling geodesic integrator…';
+/* Modules are demonstrably loading, so put the interface into the persisted
+   language before anything reads a string from it. */
+applyI18n();
+if (bootLog) bootLog.textContent = t('boot.compile');
+
+/* A missing translation renders as English (or as the key), which nobody
+   notices until a user does. Say so once, loudly, in development. */
+{
+  const missing = missingTranslations();
+  if (missing.length) {
+    console.warn('[GARGANTUA] untranslated interface strings:', missing.join(', '));
+  }
+}
 
 const setBoot = (msg, pct) => {
   if (bootLog) bootLog.textContent = msg;
   if (bootBar) bootBar.style.width = Math.round(pct * 100) + '%';
 };
 
-function fatal(title, detail) {
+function fatal(titleKey, detail) {
   if (!fatalEl) return;
   fatalEl.querySelector('.fatal-box').innerHTML =
-    `<h2>${title}</h2><p>${detail}</p>`;
+    `<h2>${t(titleKey)}</h2><p>${detail}</p>`;
   fatalEl.classList.add('show');
   if (boot) boot.classList.add('done');
 }
@@ -61,7 +73,7 @@ function fatal(title, detail) {
 window.addEventListener('error', (e) => {
   const msg = e.error?.message || e.message || 'unknown error';
   console.error('[GARGANTUA] uncaught', e.error || e.message);
-  if (!running) fatal('STARTUP FAILED', escapeHtml(msg));
+  if (!running) fatal('fatal.startup.title', escapeHtml(msg));
 });
 window.addEventListener('unhandledrejection', (e) => {
   console.error('[GARGANTUA] unhandled rejection', e.reason);
@@ -117,37 +129,32 @@ function makeRenderer() {
   return r;
 }
 
-setBoot('probing WebGL2…', 0.06);
+setBoot(t('boot.probe'), 0.06);
 
 const probe = document.createElement('canvas').getContext('webgl2');
 if (!probe) {
-  fatal(
-    'WEBGL2 UNAVAILABLE',
-    'GARGANTUA integrates null geodesics in a WebGL2 fragment shader. This browser or '
-    + 'GPU driver reports no WebGL2 context. Try a recent Chrome, Edge, Firefox or Safari 15+, '
-    + 'and make sure hardware acceleration is enabled.'
-  );
+  fatal('fatal.webgl2.title', t('fatal.webgl2.body'));
   throw new Error('WebGL2 unavailable');
 }
 
 try {
   renderer = makeRenderer();
 } catch (e) {
-  fatal('CONTEXT CREATION FAILED', escapeHtml(e.message));
+  fatal('fatal.ctx.title', escapeHtml(e.message));
   throw e;
 }
 
-setBoot('compiling geodesic integrator…', 0.22);
+setBoot(t('boot.compile'), 0.22);
 
 try {
   pipeline = new BlackHolePipeline(renderer, { bloomMips: tier().bloomMips });
 } catch (e) {
   console.error('[GARGANTUA] pipeline build failed', e);
-  fatal('SHADER COMPILATION FAILED', escapeHtml(e.message).slice(0, 900));
+  fatal('fatal.shader.title', escapeHtml(e.message).slice(0, 900));
   throw e;
 }
 
-setBoot('building camera and interface…', 0.62);
+setBoot(t('boot.build'), 0.62);
 
 /* ------------------------------------------------------------------ *
  *  3. camera / hud / audio
@@ -178,7 +185,7 @@ hud = new Hud({
     hud?.syncAll();
     rig.setSpherical(27, 74.5, 34, 42);
     rig.setRoll(1.2);
-    hud?.toast('ALL PARAMETERS RESET');
+    hud?.toast(t('toast.reset'));
   },
 });
 
@@ -419,8 +426,8 @@ function finishShot(u) {
        taken by an external tool never catches it mid-transition. */
     boot?.classList.add('done');
     if (boot) boot.style.display = 'none';
-    if (state.hud) hud?.toast('SHOT READY — window.__GARGANTUA_SHOT__', 4200);
-    setBoot('frame captured', 1);
+    if (state.hud) hud?.toast(t('toast.shotReady'), 4200);
+    setBoot(t('boot.captured'), 1);
   } catch (e) {
     console.error('[GARGANTUA] screenshot failed', e);
   }
@@ -433,10 +440,10 @@ function downloadShot() {
     a.href = url;
     a.download = `gargantua_${Date.now()}.png`;
     a.click();
-    hud?.toast('PNG SAVED');
+    hud?.toast(t('toast.pngSaved'));
   } catch (e) {
     console.error('[GARGANTUA] download failed', e);
-    hud?.toast('PNG FAILED — see console');
+    hud?.toast(t('toast.pngFailed'));
   }
 }
 
@@ -447,7 +454,7 @@ async function toggleFullscreen() {
   try {
     if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
     else await document.exitFullscreen();
-  } catch (e) { hud?.toast('FULLSCREEN BLOCKED'); }
+  } catch (e) { hud?.toast(t('toast.fsBlocked')); }
 }
 
 /* ------------------------------------------------------------------ *
@@ -461,10 +468,7 @@ function onContextLost() {
   running = false;
   if (lostEl) {
     lostEl.classList.add('show');
-    if (lostMsg) lostMsg.textContent =
-      'The WebGL context was released by the driver (this happens on GPU reset, driver '
-      + 'update, laptop dGPU hand-off and after long tab suspension). GARGANTUA keeps its '
-      + 'entire state and rebuilds every GPU resource the moment the browser restores it.';
+    if (lostMsg) lostMsg.textContent = t('lost.body');
   }
   emit('contextlost', {});
 }
@@ -507,11 +511,13 @@ function recover() {
     lostEl?.classList.remove('show');
     /* an automated driver may have paused the loop; recovery always restarts it */
     if (!running) { running = true; last = performance.now(); scheduleFrame(); }
-    hud?.toast('GPU CONTEXT RESTORED', 2600);
+    hud?.toast(t('toast.ctxRestored'), 2600);
   } catch (e) {
     console.error('[GARGANTUA] recovery failed', e);
     if (lostMsg) lostMsg.textContent =
-      'Recovery failed: ' + e.message + ' — press RESTORE NOW to try again, or reload the page.';
+      t('lost.failed') + ': ' + e.message + (isZh()
+        ? ' —— 请点击“立即恢复”重试，或刷新页面。'
+        : ' — press RESTORE NOW to try again, or reload the page.');
   }
 }
 $('#lostBtn')?.addEventListener('click', () => {
@@ -521,7 +527,7 @@ $('#lostBtn')?.addEventListener('click', () => {
       const ext = renderer.getContext().getExtension('WEBGL_lose_context');
       ext?.restoreContext();
     } catch (e) { /* ignore */ }
-    if (lostMsg) lostMsg.textContent = 'Waiting for the driver to restore the context…';
+    if (lostMsg) lostMsg.textContent = t('lost.waiting');
   } else {
     recover();
   }
@@ -531,7 +537,7 @@ $('#lostBtn')?.addEventListener('click', () => {
  *  10. go
  * ------------------------------------------------------------------ */
 function bootDone() {
-  setBoot('ready', 1);
+  setBoot(t('boot.done'), 1);
   boot?.classList.add('done');
   setTimeout(() => {
     if (boot && !state.boot.screenshotRequested) boot.style.display = 'none';

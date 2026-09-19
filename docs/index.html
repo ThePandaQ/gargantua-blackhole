@@ -31,19 +31,29 @@
   <div class="hud-top">
     <header class="brand">
       <h1>GARGANTUA</h1>
-      <p>SCHWARZSCHILD&nbsp;RAYTRACER · <span class="accent">Rs&nbsp;=&nbsp;1</span> · <span id="brandTier">HIGH</span></p>
+      <p><span data-i18n="brand.sub">SCHWARZSCHILD&nbsp;RAYTRACER</span> · <span class="accent">Rs&nbsp;=&nbsp;1</span> · <span id="brandTier">HIGH</span></p>
     </header>
-    <button id="hudBtn" class="ghost-corner" title="Hide interface (H)">HIDE UI<kbd>H</kbd></button>
+    <div class="top-actions">
+      <button id="langBtn" class="ghost-corner" data-i18n-title="ui.langTitle">中文</button>
+      <button id="hudBtn" class="ghost-corner" data-i18n-title="ui.hideTitle">HIDE UI<kbd>H</kbd></button>
+    </div>
   </div>
 
   <!-- ---------------- left column ---------------- -->
   <div class="hud-col hud-left">
     <section class="panel params" id="paramPanel">
       <div class="panel-head">
-        <h2>PARAMETERS <span class="pill"><b class="param-count">21</b></span></h2>
-        <button id="resetBtn" class="mini" title="Reset every parameter to defaults (R)">RESET</button>
+        <h2><span data-i18n="panel.params">PARAMETERS</span> <span class="pill"><b class="param-count">21</b></span></h2>
+        <div class="head-actions">
+          <button id="collapseBtn" class="mini" data-i18n="ui.collapseAll">COLLAPSE ALL</button>
+          <button id="resetBtn" class="mini" data-i18n="panel.reset" data-i18n-title="ui.resetTitle">RESET</button>
+        </div>
       </div>
       <div id="paramSliders" class="sliders"></div>
+      <div class="panel-foot">
+        <span class="hint"><kbd>E</kbd> <span data-i18n="foot.collapse">fold all</span></span>
+        <span class="hint"><kbd>H</kbd> <span data-i18n="foot.hide">hide interface</span></span>
+      </div>
     </section>
   </div>
 
@@ -51,54 +61,54 @@
   <div class="hud-col hud-right">
 
     <aside class="panel control" id="telemetryPanel">
-      <h2>TELEMETRY <span class="dim">LIVE</span></h2>
+      <h2><span data-i18n="panel.telemetry">TELEMETRY</span> <span class="dim" data-i18n="panel.live">LIVE</span></h2>
       <div id="stats" class="stats"></div>
       <div class="consts">
-        <div><span>HORIZON</span><b>r = 1.00 Rs</b></div>
-        <div><span>PHOTON SPHERE</span><b>r = 1.50 Rs</b></div>
-        <div><span>SHADOW</span><b>b = 2.598 Rs</b></div>
-        <div><span>ISCO</span><b>r = 3.00 Rs</b></div>
+        <div data-const="horizon"><span>HORIZON</span><b>r = 1.00 Rs</b></div>
+        <div data-const="photon"><span>PHOTON SPHERE</span><b>r = 1.50 Rs</b></div>
+        <div data-const="shadow"><span>SHADOW</span><b>b = 2.598 Rs</b></div>
+        <div data-const="isco"><span>ISCO</span><b>r = 3.00 Rs</b></div>
       </div>
     </aside>
 
     <nav class="panel control" id="viewPanel">
-      <h2>VIEW</h2>
+      <h2 data-i18n="panel.view">VIEW</h2>
       <div class="btns" id="presetGroup">
-        <button data-preset="ring"    title="Edge-on — photon ring and higher-order images (1)">1 RING</button>
-        <button data-preset="classic" title="The Interstellar framing (2)">2 CINEMA</button>
-        <button data-preset="isco"    title="Close approach, extreme beaming (3)">3 ISCO</button>
-        <button data-preset="polar"   title="Near face-on, full disc (4)">4 POLAR</button>
+        <button data-preset="ring"    data-i18n-title="view.title.ring">1 RING</button>
+        <button data-preset="classic" data-i18n-title="view.title.classic">2 CINEMA</button>
+        <button data-preset="isco"    data-i18n-title="view.title.isco">3 ISCO</button>
+        <button data-preset="polar"   data-i18n-title="view.title.polar">4 POLAR</button>
       </div>
     </nav>
 
     <nav class="panel control" id="renderPanel">
-      <h2>RENDER</h2>
+      <h2 data-i18n="panel.render">RENDER</h2>
       <div class="btns tight" id="qualityGroup">
-        <button data-quality="standard"  title="Low-power tier (Q cycles)">STD</button>
-        <button data-quality="high"      title="Default tier">HIGH</button>
-        <button data-quality="cinematic" title="Maximum fidelity tier">CINE</button>
+        <button data-quality="standard"  data-i18n="btn.quality.standard" data-i18n-title="render.title.standard">STD</button>
+        <button data-quality="high"      data-i18n="btn.quality.high" data-i18n-title="render.title.high">HIGH</button>
+        <button data-quality="cinematic" data-i18n="btn.quality.cinematic" data-i18n-title="render.title.cinematic">CINE</button>
       </div>
       <div class="btns tight">
-        <button id="autoBtn"  title="Automatic tier switching (A)">AUTO</button>
-        <button id="cineBtn"  title="Cinematic camera loop (C)">CINEMA</button>
-        <button id="musicBtn" title="Ambient score (M)">MUSIC</button>
+        <button id="autoBtn"  data-i18n="btn.auto" data-i18n-title="render.title.auto">AUTO</button>
+        <button id="cineBtn"  data-i18n="btn.cinema" data-i18n-title="render.title.cinema">CINEMA</button>
+        <button id="musicBtn" data-i18n="btn.music" data-i18n-title="render.title.music">MUSIC</button>
       </div>
       <div class="btns tight">
-        <button id="shotBtn"  title="Download a PNG of the current camera (P)">PNG</button>
-        <button id="fsBtn"    title="Fullscreen (F)">FULL</button>
-        <button id="helpBtn2" title="Keyboard reference (?)">KEYS</button>
+        <button id="shotBtn"  data-i18n="btn.png" data-i18n-title="render.title.png">PNG</button>
+        <button id="fsBtn"    data-i18n="btn.full" data-i18n-title="render.title.full">FULL</button>
+        <button id="helpBtn2" data-i18n="btn.keys" data-i18n-title="render.title.keys">KEYS</button>
       </div>
     </nav>
 
     <nav class="panel control" id="debugPanel">
-      <h2>DEBUG VIEW <span class="dim">0–9</span></h2>
+      <h2><span data-i18n="panel.debug">DEBUG VIEW</span> <span class="dim">0–9</span></h2>
       <div class="dots" id="debugDots"></div>
       <div class="debug-label" id="debugLabel">0 · FINAL COMPOSITE</div>
     </nav>
 
   </div>
 
-  <div id="cineBar" title="Cinematic loop position"><span></span></div>
+  <div id="cineBar" data-i18n-title="cine.title"><span></span></div>
   <div id="toast"></div>
   <div id="fatal" class="fatal"><div class="fatal-box"></div></div>
 </div>
@@ -132,11 +142,78 @@
   var box = document.getElementById('bootError');
   var log = document.getElementById('bootLog');
 
-  function show(html) {
+  /* Read the persisted language straight out of localStorage. This script
+     cannot import the i18n module — that is precisely the thing that may have
+     failed — so it carries its own copy of the few strings it needs. */
+  var STR = {
+    en: {
+      loading: 'loading modules…',
+      halted: 'startup halted',
+      fileTitle: 'OPEN THIS THROUGH A LOCAL SERVER',
+      fileP1: 'You are viewing this page straight from disk (<code>file://</code>). '
+        + 'Browsers refuse to load ES modules that way — the module origin is '
+        + '<code>null</code> — so <code>src/main.js</code> never runs and the boot '
+        + 'screen would spin forever.',
+      fileP2: '请通过本地服务器打开，不要直接双击 index.html。浏览器出于 CORS 限制'
+        + '不会从 file:// 加载 ES 模块，所以脚本根本没有执行。',
+      thenOpen: 'Then open <code>http://127.0.0.1:8099/</code> — not the file path.',
+      thenOpenZh: '然后访问 <code>http://127.0.0.1:8099/</code>，而不是文件路径。',
+      anyServer: 'Any static server works: <code>npx serve .</code>, '
+        + '<code>python -m http.server 8099</code>, VS Code Live Server…',
+      stallTitle: 'STARTUP STALLED',
+      stallP1: 'The page loaded but the raytracer never finished starting. '
+        + 'Open the browser console (<code>F12</code>) — the cause will be the '
+        + 'first red line there.',
+      stallP2: '页面已加载但渲染器未能启动。按 F12 打开控制台，第一条红色报错就是原因。',
+      stallP3: 'Common causes: WebGL2 disabled, hardware acceleration off, '
+        + 'or a blocking extension. <code>chrome://gpu</code> reports the first two.',
+    },
+    zh: {
+      loading: '正在加载模块…',
+      halted: '启动已中止',
+      fileTitle: '请通过本地服务器打开',
+      fileP1: 'You are viewing this page straight from disk (<code>file://</code>). '
+        + 'Browsers refuse to load ES modules that way, so <code>src/main.js</code> '
+        + 'never runs.',
+      fileP2: '你正在直接打开磁盘上的文件。浏览器出于 CORS 限制不会从 file:// 加载 '
+        + 'ES 模块，所以 src/main.js 根本没有执行。',
+      thenOpen: 'Then open <code>http://127.0.0.1:8099/</code>, not the file path.',
+      thenOpenZh: '然后访问 http://127.0.0.1:8099/ ，而不是文件路径。',
+      anyServer: '任何静态服务器都可以：<code>npx serve .</code>、'
+        + '<code>python -m http.server 8099</code>、VS Code Live Server…',
+      stallTitle: '启动卡住',
+      stallP1: 'The page loaded but the raytracer never finished starting. '
+        + 'Open the browser console (<code>F12</code>).',
+      stallP2: '页面已加载但渲染器未能启动。按 F12 打开控制台，第一条红色报错就是原因。',
+      stallP3: '常见原因：WebGL2 被禁用、硬件加速关闭、或扩展拦截。'
+        + '<code>chrome://gpu</code> 可以看到前两项。',
+    },
+  };
+
+  function pickLang() {
+    try {
+      var q = new URLSearchParams(location.search).get('lang');
+      if (q === 'zh' || q === 'en') return q;
+      var raw = localStorage.getItem('gargantua.schwarzschild.v1');
+      if (raw) {
+        var p = JSON.parse(raw);
+        if (p && (p.lang === 'zh' || p.lang === 'en')) return p.lang;
+      }
+      /* otherwise follow the browser */
+      if ((navigator.language || '').toLowerCase().indexOf('zh') === 0) return 'zh';
+    } catch (e) { /* private mode, corrupt payload — fall through */ }
+    return 'en';
+  }
+
+  var L = STR[pickLang()];
+  document.documentElement.lang = pickLang() === 'zh' ? 'zh-CN' : 'en';
+  if (log) log.textContent = L.loading;
+
+  function show(html, logText) {
     if (!box) return;
     box.innerHTML = html;
     box.hidden = false;
-    if (log) log.textContent = 'startup halted';
+    if (log) log.textContent = logText || L.halted;
     var bar = document.getElementById('bootBar');
     if (bar) bar.style.width = '100%';
   }
@@ -158,18 +235,13 @@
   if (location.protocol === 'file:') {
     window.__GARGANTUA_FILE_PROTOCOL__ = true;
     show(
-      '<h2>OPEN THIS THROUGH A LOCAL SERVER</h2>'
-      + '<p>You are viewing this page straight from disk (<code>file://</code>). '
-      + 'Browsers refuse to load ES modules that way — the module origin is '
-      + '<code>null</code> — so <code>src/main.js</code> never runs and the boot '
-      + 'screen would spin forever.</p>'
-      + '<p class="be">请通过本地服务器打开，不要直接双击 index.html。浏览器出于 CORS 限制'
-      + '不会从 file:// 加载 ES 模块，所以脚本根本没有执行。</p>'
+      '<h2>' + L.fileTitle + '</h2>'
+      + '<p>' + L.fileP1 + '</p>'
+      + '<p class="be">' + L.fileP2 + '</p>'
       + '<p class="cmd">cd ' + where() + '<br>' + command() + '</p>'
-      + '<p>Then open <code>http://127.0.0.1:8099/</code> — not the file path.</p>'
-      + '<p class="be">然后访问 <code>http://127.0.0.1:8099/</code>，而不是文件路径。</p>'
-      + '<p class="dim">Any static server works: <code>npx serve .</code>, '
-      + '<code>python -m http.server 8099</code>, VS Code Live Server…</p>'
+      + '<p>' + L.thenOpen + '</p>'
+      + '<p class="be">' + L.thenOpenZh + '</p>'
+      + '<p class="dim">' + L.anyServer + '</p>'
     );
     return;
   }
@@ -179,13 +251,10 @@
   window.__GARGANTUA_BOOT_TIMER__ = setTimeout(function () {
     if (window.__GARGANTUA_BOOTED__ || window.__GARGANTUA_FILE_PROTOCOL__) return;
     show(
-      '<h2>STARTUP STALLED</h2>'
-      + '<p>The page loaded but the raytracer never finished starting. '
-      + 'Open the browser console (<code>F12</code>) — the cause will be the '
-      + 'first red line there.</p>'
-      + '<p class="be">页面已加载但渲染器未能启动。按 F12 打开控制台，第一条红色报错就是原因。</p>'
-      + '<p class="dim">Common causes: WebGL2 disabled, hardware acceleration off, '
-      + 'or a blocking extension. <code>chrome://gpu</code> reports the first two.</p>'
+      '<h2>' + L.stallTitle + '</h2>'
+      + '<p>' + L.stallP1 + '</p>'
+      + '<p class="be">' + L.stallP2 + '</p>'
+      + '<p class="dim">' + L.stallP3 + '</p>'
     );
   }, 15000);
 })();
@@ -193,77 +262,28 @@
 
 <div id="lost" class="lost">
   <div class="lost-box">
-    <h2>GPU CONTEXT LOST</h2>
-    <p id="lostMsg">The WebGL context was lost. GARGANTUA is rebuilding every GPU resource — this happens automatically when the driver recovers, or when the tab returns to the foreground.</p>
-    <button id="lostBtn">RESTORE NOW</button>
+    <h2 data-i18n="lost.title">GPU CONTEXT LOST</h2>
+    <p id="lostMsg" data-i18n="lost.body">The WebGL context was lost. GARGANTUA is rebuilding every GPU resource — this happens automatically when the driver recovers, or when the tab returns to the foreground.</p>
+    <button id="lostBtn" data-i18n="lost.btn">RESTORE NOW</button>
   </div>
 </div>
 
+<!-- The help overlay's body is generated from the dictionaries (src/ui/hud.js)
+     so it cannot fall out of step with the debug modes or the hotkey list. -->
 <div id="helpOverlay">
   <div class="help-box">
     <div class="help-head">
-      <h2>KEYBOARD &amp; POINTER</h2>
-      <button class="mini" onclick="document.getElementById('helpOverlay').classList.remove('show')">CLOSE</button>
+      <h2 data-i18n="help.title">KEYBOARD &amp; POINTER</h2>
+      <button class="mini" id="helpClose" data-i18n="help.close">CLOSE</button>
     </div>
-    <div class="help-grid">
-      <div class="help-col">
-        <h3>CAMERA</h3>
-        <dl>
-          <dt>DRAG</dt><dd>Orbit (left / one finger)</dd>
-          <dt>WHEEL / PINCH</dt><dd>Dolly in &amp; out</dd>
-          <dt>1 2 3 4</dt><dd>Photon ring / Cinematic / ISCO / Polar</dd>
-          <dt>V / N</dt><dd>Next / previous view preset</dd>
-          <dt>← →</dt><dd>Cycle view presets</dd>
-          <dt>C</dt><dd>Cinematic camera loop (84 s)</dd>
-        </dl>
-        <h3>DEBUG VIEWS</h3>
-        <dl>
-          <dt>0</dt><dd>Final graded composite</dd>
-          <dt>1</dt><dd>Raw HDR, false-colour log luminance</dd>
-          <dt>2</dt><dd>RK4 integration cost (steps / ray)</dd>
-          <dt>3</dt><dd>Total deflection angle</dd>
-          <dt>4</dt><dd>Impact parameter b / b<sub>crit</sub></dd>
-          <dt>5</dt><dd>Doppler factor δ at the disc</dd>
-          <dt>6</dt><dd>Gravitational shift √(1−Rs/r)</dd>
-          <dt>7</dt><dd>Observed disc temperature (K)</dd>
-          <dt>8</dt><dd>Disc crossings per ray</dd>
-          <dt>9</dt><dd>Lensed sky only (disc hidden)</dd>
-        </dl>
-      </div>
-      <div class="help-col">
-        <h3>INTERFACE</h3>
-        <dl>
-          <dt>H</dt><dd>Hide / show the whole HUD</dd>
-          <dt>Q</dt><dd>Cycle quality tier</dd>
-          <dt>A</dt><dd>Toggle automatic quality</dd>
-          <dt>M</dt><dd>Ambient score</dd>
-          <dt>P</dt><dd>Download PNG</dd>
-          <dt>F</dt><dd>Fullscreen</dd>
-          <dt>R</dt><dd>Reset all parameters</dd>
-          <dt>?</dt><dd>This panel</dd>
-        </dl>
-        <h3>SCREENSHOT AUTOMATION</h3>
-        <dl class="mono">
-          <dt>?shot=1</dt><dd>render one frame, expose it, stop</dd>
-          <dt>&amp;t=12</dt><dd>freeze the sim clock at 12 s</dd>
-          <dt>&amp;w=3840&amp;h=2160</dt><dd>force the output buffer</dd>
-          <dt>&amp;preset=ring</dt><dd>jump to a named view</dd>
-          <dt>&amp;ui=0</dt><dd>hide the HUD before capture</dd>
-        </dl>
-        <p class="help-note">
-          When the frame is ready the page sets <code>window.__GARGANTUA_READY__ = true</code>,
-          dispatches a <code>gargantua:shot</code> event and puts a PNG data URL in
-          <code>window.__GARGANTUA_SHOT__</code>.
-        </p>
-      </div>
-    </div>
+    <div class="help-grid" id="helpBody"></div>
   </div>
 </div>
 
 <noscript>
   <div class="fatal show"><div class="fatal-box">
-    <h2>JAVASCRIPT REQUIRED</h2>
-    <p>GARGANTUA integrates null geodesics in a fragment shader and therefore needs JavaScript and WebGL2.</p>
+    <h2 data-i18n="fatal.js.title">JAVASCRIPT REQUIRED</h2>
+    <p data-i18n="fatal.js.body">GARGANTUA integrates null geodesics in a fragment shader and therefore needs JavaScript and WebGL2.</p>
   </div></div>
 </noscript>
 

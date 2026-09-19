@@ -1,17 +1,21 @@
+<!--
+  GENERATED FILE — do not edit.
+  Produced from index.html by tools/build-site.mjs so the acceptance
+  harness always exercises the shipped markup. Edit index.html instead.
+-->
 <!DOCTYPE html>
-<html lang="en" data-harness="1">
+<html lang="en" data-lang="en" data-harness="1">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+<meta name="theme-color" content="#000000" />
+<meta name="color-scheme" content="dark" />
 <title>GARGANTUA — acceptance harness</title>
-<link rel="icon" href="data:," />
-<link rel="stylesheet" href="../style.css" />
-<style>
-  /* the harness drives the real UI, but the boot curtain must not swallow the
-     first frames while we measure them */
-  #boot { transition: none; }
-  #hud { transition: none; }
-</style>
+<meta name="description" content="A real-time Schwarzschild black hole: null geodesics integrated per pixel in a fragment shader, with gravitational lensing, a relativistic accretion disc, Doppler beaming and gravitational redshift." />
+
+<!-- Three.js is served from ./vendor — no CDN, no build step, no bundler. -->
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23000'/%3E%3Ccircle cx='32' cy='32' r='13' fill='%23000' stroke='%23ffb46a' stroke-width='2'/%3E%3Cellipse cx='32' cy='32' rx='27' ry='5' fill='none' stroke='%23ff9a3c' stroke-width='3'/%3E%3C/svg%3E" />
 <script type="importmap">
 {
   "imports": {
@@ -20,86 +24,273 @@
   }
 }
 </script>
+<link rel="stylesheet" href="../style.css" />
 </head>
 <body>
 
-<!-- The canvas and every HUD node are the real ones from index.html: the
-     harness exercises the shipped markup, not a mock. -->
-<canvas id="scene"></canvas>
+<canvas id="scene" aria-label="Real-time Schwarzschild black hole raytracer"></canvas>
 
+<!-- ============================ HUD ============================ -->
 <div id="hud">
-  <header class="brand">
-    <h1>GARGANTUA</h1>
-    <p>SCHWARZSCHILD&nbsp;RAYTRACER · <span class="accent">Rs&nbsp;=&nbsp;1</span> · <span id="brandTier">HIGH</span></p>
-  </header>
-  <button id="hudBtn" class="ghost-corner">HIDE UI</button>
-  <aside class="panel panel-right" id="telemetryPanel">
-    <h2>TELEMETRY <span class="dim">LIVE</span></h2>
-    <div id="stats" class="stats"></div>
-    <div class="consts">
-      <div>HORIZON <b>r = 1.00 Rs</b></div>
-      <div>PHOTON SPHERE <b>r = 1.50 Rs</b></div>
-      <div>SHADOW <b>b = 2.598 Rs</b></div>
-      <div>ISCO <b>r = 3.00 Rs</b></div>
+
+  <div class="hud-top">
+    <header class="brand">
+      <h1>GARGANTUA</h1>
+      <p><span data-i18n="brand.sub">SCHWARZSCHILD&nbsp;RAYTRACER</span> · <span class="accent">Rs&nbsp;=&nbsp;1</span> · <span id="brandTier">HIGH</span></p>
+    </header>
+    <div class="top-actions">
+      <button id="langBtn" class="ghost-corner" data-i18n-title="ui.langTitle">中文</button>
+      <button id="hudBtn" class="ghost-corner" data-i18n-title="ui.hideTitle">HIDE UI<kbd>H</kbd></button>
     </div>
-  </aside>
-  <section class="panel panel-left params" id="paramPanel">
-    <div class="panel-head">
-      <h2>PARAMETERS <span class="pill"><b class="param-count">21</b></span></h2>
-      <button id="resetBtn" class="mini">RESET</button>
-    </div>
-    <div id="paramSliders" class="sliders"></div>
-  </section>
-  <nav class="panel panel-right control" id="viewPanel" style="bottom:196px">
-    <h2>VIEW</h2>
-    <div class="btns" id="presetGroup">
-      <button data-preset="ring">1 PHOTON RING</button>
-      <button data-preset="classic">2 CINEMATIC</button>
-      <button data-preset="isco">3 ISCO DIVE</button>
-      <button data-preset="polar">4 POLAR SWEEP</button>
-    </div>
-  </nav>
-  <nav class="panel panel-right control" id="renderPanel" style="bottom:104px">
-    <h2>RENDER</h2>
-    <div class="btns" id="qualityGroup">
-      <button data-quality="standard">STANDARD</button>
-      <button data-quality="high">HIGH</button>
-      <button data-quality="cinematic">CINEMATIC</button>
-    </div>
-    <div class="btns tight">
-      <button id="autoBtn">AUTO</button><button id="cineBtn">CINEMATIC</button><button id="musicBtn">MUSIC OFF</button>
-    </div>
-    <div class="btns tight">
-      <button id="shotBtn">PNG</button><button id="fsBtn">FULLSCREEN</button>
-      <button id="helpBtn2" title="keys">KEYS</button>
-    </div>
-  </nav>
-  <nav class="panel panel-right control" id="debugPanel" style="bottom:12px">
-    <h2>DEBUG VIEW</h2>
-    <div class="dots" id="debugDots"></div>
-    <div class="debug-label" id="debugLabel">0 · FINAL COMPOSITE</div>
-  </nav>
-  <div id="cineBar"><span></span></div>
+  </div>
+
+  <!-- ---------------- left column ---------------- -->
+  <div class="hud-col hud-left">
+    <section class="panel params" id="paramPanel">
+      <div class="panel-head">
+        <h2><span data-i18n="panel.params">PARAMETERS</span> <span class="pill"><b class="param-count">21</b></span></h2>
+        <div class="head-actions">
+          <button id="collapseBtn" class="mini" data-i18n="ui.collapseAll">COLLAPSE ALL</button>
+          <button id="resetBtn" class="mini" data-i18n="panel.reset" data-i18n-title="ui.resetTitle">RESET</button>
+        </div>
+      </div>
+      <div id="paramSliders" class="sliders"></div>
+      <div class="panel-foot">
+        <span class="hint"><kbd>E</kbd> <span data-i18n="foot.collapse">fold all</span></span>
+        <span class="hint"><kbd>H</kbd> <span data-i18n="foot.hide">hide interface</span></span>
+      </div>
+    </section>
+  </div>
+
+  <!-- ---------------- right column ---------------- -->
+  <div class="hud-col hud-right">
+
+    <aside class="panel control" id="telemetryPanel">
+      <h2><span data-i18n="panel.telemetry">TELEMETRY</span> <span class="dim" data-i18n="panel.live">LIVE</span></h2>
+      <div id="stats" class="stats"></div>
+      <div class="consts">
+        <div data-const="horizon"><span>HORIZON</span><b>r = 1.00 Rs</b></div>
+        <div data-const="photon"><span>PHOTON SPHERE</span><b>r = 1.50 Rs</b></div>
+        <div data-const="shadow"><span>SHADOW</span><b>b = 2.598 Rs</b></div>
+        <div data-const="isco"><span>ISCO</span><b>r = 3.00 Rs</b></div>
+      </div>
+    </aside>
+
+    <nav class="panel control" id="viewPanel">
+      <h2 data-i18n="panel.view">VIEW</h2>
+      <div class="btns" id="presetGroup">
+        <button data-preset="ring"    data-i18n-title="view.title.ring">1 RING</button>
+        <button data-preset="classic" data-i18n-title="view.title.classic">2 CINEMA</button>
+        <button data-preset="isco"    data-i18n-title="view.title.isco">3 ISCO</button>
+        <button data-preset="polar"   data-i18n-title="view.title.polar">4 POLAR</button>
+      </div>
+    </nav>
+
+    <nav class="panel control" id="renderPanel">
+      <h2 data-i18n="panel.render">RENDER</h2>
+      <div class="btns tight" id="qualityGroup">
+        <button data-quality="standard"  data-i18n="btn.quality.standard" data-i18n-title="render.title.standard">STD</button>
+        <button data-quality="high"      data-i18n="btn.quality.high" data-i18n-title="render.title.high">HIGH</button>
+        <button data-quality="cinematic" data-i18n="btn.quality.cinematic" data-i18n-title="render.title.cinematic">CINE</button>
+      </div>
+      <div class="btns tight">
+        <button id="autoBtn"  data-i18n="btn.auto" data-i18n-title="render.title.auto">AUTO</button>
+        <button id="cineBtn"  data-i18n="btn.cinema" data-i18n-title="render.title.cinema">CINEMA</button>
+        <button id="musicBtn" data-i18n="btn.music" data-i18n-title="render.title.music">MUSIC</button>
+      </div>
+      <div class="btns tight">
+        <button id="shotBtn"  data-i18n="btn.png" data-i18n-title="render.title.png">PNG</button>
+        <button id="fsBtn"    data-i18n="btn.full" data-i18n-title="render.title.full">FULL</button>
+        <button id="helpBtn2" data-i18n="btn.keys" data-i18n-title="render.title.keys">KEYS</button>
+      </div>
+    </nav>
+
+    <nav class="panel control" id="debugPanel">
+      <h2><span data-i18n="panel.debug">DEBUG VIEW</span> <span class="dim">0–9</span></h2>
+      <div class="dots" id="debugDots"></div>
+      <div class="debug-label" id="debugLabel">0 · FINAL COMPOSITE</div>
+    </nav>
+
+  </div>
+
+  <div id="cineBar" data-i18n-title="cine.title"><span></span></div>
   <div id="toast"></div>
   <div id="fatal" class="fatal"><div class="fatal-box"></div></div>
 </div>
 
-<div id="boot"><div class="boot-inner">
-  <div class="boot-ring"></div><h1>GARGANTUA</h1>
-  <p class="boot-sub">SCHWARZSCHILD BLACK HOLE RAYTRACER</p>
-  <div class="boot-log" id="bootLog">…</div>
-  <div class="boot-bar"><span id="bootBar"></span></div>
-</div></div>
+<!-- ============================ Overlays ============================ -->
+<div id="boot">
+  <div class="boot-inner">
+    <div class="boot-ring"></div>
+    <h1>GARGANTUA</h1>
+    <p class="boot-sub">SCHWARZSCHILD BLACK HOLE RAYTRACER</p>
+    <div class="boot-log" id="bootLog">loading modules…</div>
+    <div class="boot-bar"><span id="bootBar"></span></div>
+  </div>
+  <div class="boot-error" id="bootError" hidden></div>
+</div>
 
-<div id="lost" class="lost"><div class="lost-box">
-  <h2>GPU CONTEXT LOST</h2><p id="lostMsg"></p><button id="lostBtn">RESTORE NOW</button>
-</div></div>
+<!--
+  Boot guard. This is a CLASSIC script on purpose: it must run before, and
+  independently of, any module, so it can still explain itself when the modules
+  are exactly what failed to load.
 
-<div id="helpOverlay"><div class="help-box">
-  <div class="help-head"><h2>KEYS</h2><button class="mini" id="helpClose">CLOSE</button></div>
-  <div class="help-grid"><div class="help-col"><h3>CAMERA</h3><dl><dt>DRAG</dt><dd>orbit</dd></dl></div>
-  <div class="help-col"><h3>INTERFACE</h3><dl><dt>H</dt><dd>hide hud</dd></dl></div></div>
-</div></div>
+  Two failure modes are caught here:
+    • file:// — browsers refuse to load ES modules from the filesystem (the
+      origin is "null"), so src/main.js never executes. Without this guard the
+      boot screen just spins forever with nothing in the console but a CORS
+      message most people never open.
+    • anything else that stalls boot, via a timeout.
+-->
+<script>
+(function () {
+  var box = document.getElementById('bootError');
+  var log = document.getElementById('bootLog');
+
+  /* Read the persisted language straight out of localStorage. This script
+     cannot import the i18n module — that is precisely the thing that may have
+     failed — so it carries its own copy of the few strings it needs. */
+  var STR = {
+    en: {
+      loading: 'loading modules…',
+      halted: 'startup halted',
+      fileTitle: 'OPEN THIS THROUGH A LOCAL SERVER',
+      fileP1: 'You are viewing this page straight from disk (<code>file://</code>). '
+        + 'Browsers refuse to load ES modules that way — the module origin is '
+        + '<code>null</code> — so <code>src/main.js</code> never runs and the boot '
+        + 'screen would spin forever.',
+      fileP2: '请通过本地服务器打开，不要直接双击 index.html。浏览器出于 CORS 限制'
+        + '不会从 file:// 加载 ES 模块，所以脚本根本没有执行。',
+      thenOpen: 'Then open <code>http://127.0.0.1:8099/</code> — not the file path.',
+      thenOpenZh: '然后访问 <code>http://127.0.0.1:8099/</code>，而不是文件路径。',
+      anyServer: 'Any static server works: <code>npx serve .</code>, '
+        + '<code>python -m http.server 8099</code>, VS Code Live Server…',
+      stallTitle: 'STARTUP STALLED',
+      stallP1: 'The page loaded but the raytracer never finished starting. '
+        + 'Open the browser console (<code>F12</code>) — the cause will be the '
+        + 'first red line there.',
+      stallP2: '页面已加载但渲染器未能启动。按 F12 打开控制台，第一条红色报错就是原因。',
+      stallP3: 'Common causes: WebGL2 disabled, hardware acceleration off, '
+        + 'or a blocking extension. <code>chrome://gpu</code> reports the first two.',
+    },
+    zh: {
+      loading: '正在加载模块…',
+      halted: '启动已中止',
+      fileTitle: '请通过本地服务器打开',
+      fileP1: 'You are viewing this page straight from disk (<code>file://</code>). '
+        + 'Browsers refuse to load ES modules that way, so <code>src/main.js</code> '
+        + 'never runs.',
+      fileP2: '你正在直接打开磁盘上的文件。浏览器出于 CORS 限制不会从 file:// 加载 '
+        + 'ES 模块，所以 src/main.js 根本没有执行。',
+      thenOpen: 'Then open <code>http://127.0.0.1:8099/</code>, not the file path.',
+      thenOpenZh: '然后访问 http://127.0.0.1:8099/ ，而不是文件路径。',
+      anyServer: '任何静态服务器都可以：<code>npx serve .</code>、'
+        + '<code>python -m http.server 8099</code>、VS Code Live Server…',
+      stallTitle: '启动卡住',
+      stallP1: 'The page loaded but the raytracer never finished starting. '
+        + 'Open the browser console (<code>F12</code>).',
+      stallP2: '页面已加载但渲染器未能启动。按 F12 打开控制台，第一条红色报错就是原因。',
+      stallP3: '常见原因：WebGL2 被禁用、硬件加速关闭、或扩展拦截。'
+        + '<code>chrome://gpu</code> 可以看到前两项。',
+    },
+  };
+
+  function pickLang() {
+    try {
+      var q = new URLSearchParams(location.search).get('lang');
+      if (q === 'zh' || q === 'en') return q;
+      var raw = localStorage.getItem('gargantua.schwarzschild.v1');
+      if (raw) {
+        var p = JSON.parse(raw);
+        if (p && (p.lang === 'zh' || p.lang === 'en')) return p.lang;
+      }
+      /* otherwise follow the browser */
+      if ((navigator.language || '').toLowerCase().indexOf('zh') === 0) return 'zh';
+    } catch (e) { /* private mode, corrupt payload — fall through */ }
+    return 'en';
+  }
+
+  var L = STR[pickLang()];
+  document.documentElement.lang = pickLang() === 'zh' ? 'zh-CN' : 'en';
+  if (log) log.textContent = L.loading;
+
+  function show(html, logText) {
+    if (!box) return;
+    box.innerHTML = html;
+    box.hidden = false;
+    if (log) log.textContent = logText || L.halted;
+    var bar = document.getElementById('bootBar');
+    if (bar) bar.style.width = '100%';
+  }
+
+  function command() {
+    return 'node serve.mjs 8099';
+  }
+
+  /* Name the folder the user is actually looking at, rather than hardcoding a
+     path that is wrong the moment the project moves or is deployed. */
+  function where() {
+    try {
+      var parts = decodeURIComponent(location.pathname).split('/').filter(Boolean);
+      var folder = parts.length > 1 ? parts[parts.length - 2] : parts[0];
+      return folder ? folder + '\\' : '';
+    } catch (e) { return ''; }
+  }
+
+  if (location.protocol === 'file:') {
+    window.__GARGANTUA_FILE_PROTOCOL__ = true;
+    show(
+      '<h2>' + L.fileTitle + '</h2>'
+      + '<p>' + L.fileP1 + '</p>'
+      + '<p class="be">' + L.fileP2 + '</p>'
+      + '<p class="cmd">cd ' + where() + '<br>' + command() + '</p>'
+      + '<p>' + L.thenOpen + '</p>'
+      + '<p class="be">' + L.thenOpenZh + '</p>'
+      + '<p class="dim">' + L.anyServer + '</p>'
+    );
+    return;
+  }
+
+  /* 15 s is far beyond a cold compile of the five programs on any GPU, so
+     reaching it means something is genuinely wrong rather than slow. */
+  window.__GARGANTUA_BOOT_TIMER__ = setTimeout(function () {
+    if (window.__GARGANTUA_BOOTED__ || window.__GARGANTUA_FILE_PROTOCOL__) return;
+    show(
+      '<h2>' + L.stallTitle + '</h2>'
+      + '<p>' + L.stallP1 + '</p>'
+      + '<p class="be">' + L.stallP2 + '</p>'
+      + '<p class="dim">' + L.stallP3 + '</p>'
+    );
+  }, 15000);
+})();
+</script>
+
+<div id="lost" class="lost">
+  <div class="lost-box">
+    <h2 data-i18n="lost.title">GPU CONTEXT LOST</h2>
+    <p id="lostMsg" data-i18n="lost.body">The WebGL context was lost. GARGANTUA is rebuilding every GPU resource — this happens automatically when the driver recovers, or when the tab returns to the foreground.</p>
+    <button id="lostBtn" data-i18n="lost.btn">RESTORE NOW</button>
+  </div>
+</div>
+
+<!-- The help overlay's body is generated from the dictionaries (src/ui/hud.js)
+     so it cannot fall out of step with the debug modes or the hotkey list. -->
+<div id="helpOverlay">
+  <div class="help-box">
+    <div class="help-head">
+      <h2 data-i18n="help.title">KEYBOARD &amp; POINTER</h2>
+      <button class="mini" id="helpClose" data-i18n="help.close">CLOSE</button>
+    </div>
+    <div class="help-grid" id="helpBody"></div>
+  </div>
+</div>
+
+<noscript>
+  <div class="fatal show"><div class="fatal-box">
+    <h2 data-i18n="fatal.js.title">JAVASCRIPT REQUIRED</h2>
+    <p data-i18n="fatal.js.body">GARGANTUA integrates null geodesics in a fragment shader and therefore needs JavaScript and WebGL2.</p>
+  </div></div>
+</noscript>
 
 <script type="module" src="../src/main.js"></script>
 <script type="module" src="./harness.js"></script>
