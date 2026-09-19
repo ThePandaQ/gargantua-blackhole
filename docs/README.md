@@ -1,5 +1,7 @@
 # GARGANTUA — Schwarzschild Black Hole Raytracer
 
+**Live: <https://thepandaq.github.io/gargantua-blackhole/>**
+
 A full-screen, real-time black hole. Every pixel traces a null geodesic of the
 Schwarzschild metric backwards from the camera, integrated with classical RK4 in
 a fragment shader. There is no black sphere, no ring mesh, no texture, no video
@@ -12,7 +14,47 @@ step, no bundler, no CDN.**
 
 ---
 
-## 1. Run it
+## 0. Deploy it
+
+The site is already published by GitHub Pages, served from `docs/` on `main`.
+Anything in `docs/` is world-readable; everything else in the repository is
+source, tests and tooling.
+
+```bash
+node tools/build-site.mjs          # stage the deployable site into docs/
+node tools/build-site.mjs --check  # fail if docs/ has drifted from the source
+git add -A && git commit -m "..." && git push
+```
+
+`build-site.mjs` copies an explicit, human-readable manifest — 20 files, 1.4 MB —
+rather than globbing the directory. `tests/shots/` (32 MB of captured frames) and
+`tools/` stay out on purpose. If you add a file the app loads at runtime, add it
+to the `FILES` list; forgetting is the one way to publish a broken site, which is
+why `--check` exists and why the manifest is a list rather than a pattern.
+
+**Any static host works**, because every path in the project is relative and
+there is nothing to build. Netlify, Cloudflare Pages, Vercel, S3, nginx: point it
+at `docs/` and you are done. GitHub Pages was chosen because it is free, stable,
+needs no CI, and keeps the site and its source in one repository.
+
+### Verify a deployment
+
+```bash
+node tools/bootcheck.mjs https://thepandaq.github.io/gargantua-blackhole/
+```
+
+Loads the live URL in a real browser and reports the boot state, every console
+message, every exception and every failed request. Run it after a deploy, or
+after any change, to answer "is it actually working?" in one command.
+
+> GitHub Pages serves `.js` as `application/javascript`, which ES modules need,
+> so **no `_headers` or MIME configuration is required**. It does run Jekyll
+> unless told not to, which would mangle files that start with an underscore —
+> `docs/.nojekyll` is therefore part of the staged manifest and must stay.
+
+---
+
+## 1. Run it locally
 
 ```bash
 cd D:\DSH\003

@@ -24,6 +24,33 @@ npm run shots     # CDP acceptance (91 checks) + 14-frame screenshot gallery
 
 ---
 
+## 0. Deployment verification
+
+The published site was verified the same way the local build is — by loading it
+in a real browser and asserting on what happened, not by assuming that a
+successful upload means a working page.
+
+```
+live URL   https://thepandaq.github.io/gargantua-blackhole/
+host       GitHub Pages, legacy build from docs/ on main
+staged     20 files, 1.42 MB (explicit manifest, see tools/build-site.mjs)
+
+18/18 assets    HTTP 200, correct MIME types (source: application/javascript)
+ boot           booted: true,  bootLogText: "ready"
+ failed reqs    0
+ console        0 messages
+ exceptions     0
+ render         verified by running the documented capture API against the live
+                URL: ?shot=1&ui=0&t=14&preset=ring produced a correct frame
+```
+
+`node tools/bootcheck.mjs https://thepandaq.github.io/gargantua-blackhole/`
+reproduces all of that in one command, and is the check to run after any deploy.
+
+Note that GitHub Pages serves `.js` as `application/javascript` — the MIME type
+ES modules require — so no `_headers` file or server configuration is needed.
+`docs/.nojekyll` is in the manifest to stop Jekyll from processing the tree.
+
 ## 1. Static validation — `tools/validate.mjs`
 
 ```

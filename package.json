@@ -13,10 +13,13 @@
     "imports": "node tools/checkimports.mjs",
     "glsl": "node tools/glslcheck.mjs",
     "theory": "node tools/shadow-theory.mjs",
+    "boot": "node tools/bootcheck.mjs http://127.0.0.1:8099/",
     "test": "node tools/validate.mjs && node tools/checkimports.mjs && node tools/shadow-theory.mjs && node tools/glslcheck.mjs",
     "accept": "node tools/acceptance.mjs",
     "shots": "node tools/acceptance.mjs --shots",
-    "watch": "node tools/acceptance.mjs --headful"
+    "watch": "node tools/acceptance.mjs --headful",
+    "site": "node tools/build-site.mjs",
+    "site:check": "node tools/build-site.mjs --check"
   },
   "keywords": [
     "black-hole", "schwarzschild", "raytracer", "geodesic", "glsl", "webgl2",
