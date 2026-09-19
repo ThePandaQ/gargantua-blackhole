@@ -14,7 +14,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const TMP = join(ROOT, 'tests', '.chrome-probe');
-const query = process.argv[2] || '';
+/* Accept either a query string ("?lang=zh") or a full URL, so the same tool can
+   inspect the local server and the deployed site. */
+const arg = process.argv[2] || '';
+const URL_ARG = /^https?:\/\//i.test(arg);
+const query = URL_ARG ? '' : arg;
 
 class WS {
   constructor(url) {
@@ -207,7 +211,9 @@ try {
 
   await send('Runtime.enable');
   await send('Page.enable');
-  await send('Page.navigate', { url: pathToFileURL(join(ROOT, 'index.html')).href + query });
+  await send('Page.navigate', {
+    url: URL_ARG ? arg : pathToFileURL(join(ROOT, 'index.html')).href + query,
+  });
 
   for (let i = 0; i < 250; i++) {
     if (await evaluate('!!window.__GARGANTUA_BOOTED__') === true) break;
