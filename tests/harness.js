@@ -56,6 +56,22 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
+/**
+ * Wait until `check()` is true, or give up.
+ *
+ * The fold is a CSS transition, so asserting on a fixed delay measures whatever
+ * the tween happened to be doing — which on a loaded machine is a flake and on a
+ * fast one is a false pass. Waiting on the condition is the only stable form.
+ */
+async function until(check, { timeout = 3000, interval = 40 } = {}) {
+  const t0 = performance.now();
+  for (;;) {
+    if (check()) return true;
+    if (performance.now() - t0 > timeout) return false;
+    await sleep(interval);
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /* image measurement                                                   */
 /* ------------------------------------------------------------------ */
@@ -843,19 +859,18 @@ function render(frames = 3, dtMs = 16.7) {
   const firstGroup = groupEls[0];
   const wasCollapsed = firstGroup.classList.contains('collapsed');
   $('.pgroup-title', firstGroup).click();
-  await sleep(60);
+  await until(() => firstGroup.classList.contains('collapsed') !== wasCollapsed);
   const toggled = firstGroup.classList.contains('collapsed') !== wasCollapsed;
   rec('clicking a group header folds it', toggled,
     wasCollapsed + ' -> ' + firstGroup.classList.contains('collapsed'));
   $('.pgroup-title', firstGroup).click();
-  await sleep(60);
+  await until(() => firstGroup.classList.contains('collapsed') === wasCollapsed);
   rec('clicking again unfolds it', firstGroup.classList.contains('collapsed') === wasCollapsed);
 
   /* the point of the feature: fold everything, keep the readouts */
   window.dispatchEvent(new KeyboardEvent('keydown', { key: 'e', bubbles: true }));
-  /* the fold is a 240 ms CSS transition, so measuring immediately reads a
-     half-collapsed panel — wait it out rather than asserting on a tween */
-  await sleep(420);
+  const settled = await until(() => $$('#paramSliders .pgroup')
+    .every((g) => getComputedStyle($('.pgroup-body', g)).maxHeight === '0px'));
   const allFolded = $$('#paramSliders .pgroup').every((g) => g.classList.contains('collapsed'));
   rec('hotkey E folds every group at once', allFolded);
   rec('folding keeps the group headers visible',
@@ -867,7 +882,8 @@ function render(frames = 3, dtMs = 16.7) {
   const bodies = $$('#paramSliders .pgroup-body');
   const collapsedHeights = bodies.map((b) => getComputedStyle(b).maxHeight);
   rec('every group body is clipped to zero height',
-    collapsedHeights.every((h) => h === '0px'), collapsedHeights.join(' '));
+    collapsedHeights.every((h) => h === '0px'),
+    (settled ? '' : 'transition did not settle — ') + collapsedHeights.join(' '));
   rec('folding keeps the telemetry panel',
     document.getElementById('stats').getBoundingClientRect().height > 20);
   rec('the fold button flips to "expand"',
@@ -882,7 +898,8 @@ function render(frames = 3, dtMs = 16.7) {
   rec('the folded panel is compact', panelH < 220, Math.round(panelH) + ' px');
 
   window.dispatchEvent(new KeyboardEvent('keydown', { key: 'e', bubbles: true }));
-  await sleep(420);
+  await until(() => $$('#paramSliders .pgroup').every((g) => !g.classList.contains('collapsed')));
+  await sleep(300);   // let the unfold transition finish before measuring height
   rec('hotkey E unfolds everything again',
     $$('#paramSliders .pgroup').every((g) => !g.classList.contains('collapsed')));
   const panelH2 = document.getElementById('paramPanel').getBoundingClientRect().height;
