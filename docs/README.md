@@ -22,15 +22,21 @@ source, tests and tooling.
 
 ```bash
 node tools/build-site.mjs          # stage the deployable site into docs/
-node tools/build-site.mjs --check  # fail if docs/ has drifted from the source
+                                   #   ...and regenerate tests/harness.html
+node tools/build-site.mjs --check  # fail if docs/ or the harness has drifted
 git add -A && git commit -m "..." && git push
 ```
 
-`build-site.mjs` copies an explicit, human-readable manifest — 20 files, 1.4 MB —
+`build-site.mjs` copies an explicit, human-readable manifest — 21 files, 1.5 MB —
 rather than globbing the directory. `tests/shots/` (32 MB of captured frames) and
 `tools/` stay out on purpose. If you add a file the app loads at runtime, add it
 to the `FILES` list; forgetting is the one way to publish a broken site, which is
 why `--check` exists and why the manifest is a list rather than a pattern.
+
+It also **generates `tests/harness.html` from `index.html`**, so the acceptance
+suite always exercises the shipped markup. That page used to be maintained by
+hand and had drifted; now the two cannot disagree, and `--check` fails if they
+do.
 
 **Any static host works**, because every path in the project is relative and
 there is nothing to build. Netlify, Cloudflare Pages, Vercel, S3, nginx: point it
@@ -51,6 +57,11 @@ after any change, to answer "is it actually working?" in one command.
 > so **no `_headers` or MIME configuration is required**. It does run Jekyll
 > unless told not to, which would mangle files that start with an underscore —
 > `docs/.nojekyll` is therefore part of the staged manifest and must stay.
+
+> **If `git push` fails with "Failed to connect to github.com port 443"**, that is
+> a network problem rather than a repository problem — the commit is already safe
+> locally. Retry when the connection is back; `git log origin/main..HEAD` lists
+> what is still waiting to go up.
 
 ---
 
