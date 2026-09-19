@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" data-harness="1">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GARGANTUA — acceptance harness</title>
+<link rel="icon" href="data:," />
+<link rel="stylesheet" href="../style.css" />
+<style>
+  /* the harness drives the real UI, but the boot curtain must not swallow the
+     first frames while we measure them */
+  #boot { transition: none; }
+  #hud { transition: none; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "../vendor/three/three.module.js",
+    "three/addons/": "../vendor/three/addons/"
+  }
+}
+</script>
+</head>
+<body>
+
+<!-- The canvas and every HUD node are the real ones from index.html: the
+     harness exercises the shipped markup, not a mock. -->
+<canvas id="scene"></canvas>
+
+<div id="hud">
+  <header class="brand">
+    <h1>GARGANTUA</h1>
+    <p>SCHWARZSCHILD&nbsp;RAYTRACER · <span class="accent">Rs&nbsp;=&nbsp;1</span> · <span id="brandTier">HIGH</span></p>
+  </header>
+  <button id="hudBtn" class="ghost-corner">HIDE UI</button>
+  <aside class="panel panel-right" id="telemetryPanel">
+    <h2>TELEMETRY <span class="dim">LIVE</span></h2>
+    <div id="stats" class="stats"></div>
+    <div class="consts">
+      <div>HORIZON <b>r = 1.00 Rs</b></div>
+      <div>PHOTON SPHERE <b>r = 1.50 Rs</b></div>
+      <div>SHADOW <b>b = 2.598 Rs</b></div>
+      <div>ISCO <b>r = 3.00 Rs</b></div>
+    </div>
+  </aside>
+  <section class="panel panel-left params" id="paramPanel">
+    <div class="panel-head">
+      <h2>PARAMETERS <span class="pill"><b class="param-count">21</b></span></h2>
+      <button id="resetBtn" class="mini">RESET</button>
+    </div>
+    <div id="paramSliders" class="sliders"></div>
+  </section>
+  <nav class="panel panel-right control" id="viewPanel" style="bottom:196px">
+    <h2>VIEW</h2>
+    <div class="btns" id="presetGroup">
+      <button data-preset="ring">1 PHOTON RING</button>
+      <button data-preset="classic">2 CINEMATIC</button>
+      <button data-preset="isco">3 ISCO DIVE</button>
+      <button data-preset="polar">4 POLAR SWEEP</button>
+    </div>
+  </nav>
+  <nav class="panel panel-right control" id="renderPanel" style="bottom:104px">
+    <h2>RENDER</h2>
+    <div class="btns" id="qualityGroup">
+      <button data-quality="standard">STANDARD</button>
+      <button data-quality="high">HIGH</button>
+      <button data-quality="cinematic">CINEMATIC</button>
+    </div>
+    <div class="btns tight">
+      <button id="autoBtn">AUTO</button><button id="cineBtn">CINEMATIC</button><button id="musicBtn">MUSIC OFF</button>
+    </div>
+    <div class="btns tight">
+      <button id="shotBtn">PNG</button><button id="fsBtn">FULLSCREEN</button>
+      <button id="helpBtn2" title="keys">KEYS</button>
+    </div>
+  </nav>
+  <nav class="panel panel-right control" id="debugPanel" style="bottom:12px">
+    <h2>DEBUG VIEW</h2>
+    <div class="dots" id="debugDots"></div>
+    <div class="debug-label" id="debugLabel">0 · FINAL COMPOSITE</div>
+  </nav>
+  <div id="cineBar"><span></span></div>
+  <div id="toast"></div>
+  <div id="fatal" class="fatal"><div class="fatal-box"></div></div>
+</div>
+
+<div id="boot"><div class="boot-inner">
+  <div class="boot-ring"></div><h1>GARGANTUA</h1>
+  <p class="boot-sub">SCHWARZSCHILD BLACK HOLE RAYTRACER</p>
+  <div class="boot-log" id="bootLog">…</div>
+  <div class="boot-bar"><span id="bootBar"></span></div>
+</div></div>
+
+<div id="lost" class="lost"><div class="lost-box">
+  <h2>GPU CONTEXT LOST</h2><p id="lostMsg"></p><button id="lostBtn">RESTORE NOW</button>
+</div></div>
+
+<div id="helpOverlay"><div class="help-box">
+  <div class="help-head"><h2>KEYS</h2><button class="mini" id="helpClose">CLOSE</button></div>
+  <div class="help-grid"><div class="help-col"><h3>CAMERA</h3><dl><dt>DRAG</dt><dd>orbit</dd></dl></div>
+  <div class="help-col"><h3>INTERFACE</h3><dl><dt>H</dt><dd>hide hud</dd></dl></div></div>
+</div></div>
+
+<script type="module" src="../src/main.js"></script>
+<script type="module" src="./harness.js"></script>
+</body>
+</html>

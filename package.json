@@ -1,0 +1,25 @@
+{
+  "name": "gargantua-schwarzschild-raytracer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Real-time Schwarzschild black hole raytracer — null geodesics integrated per pixel in a fragment shader, with a relativistic accretion disc, HDR bloom and ACES grading. Vanilla ES modules, no build step.",
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node serve.mjs 8099",
+    "serve": "node serve.mjs 8099",
+    "validate": "node tools/validate.mjs",
+    "imports": "node tools/checkimports.mjs",
+    "glsl": "node tools/glslcheck.mjs",
+    "theory": "node tools/shadow-theory.mjs",
+    "test": "node tools/validate.mjs && node tools/checkimports.mjs && node tools/shadow-theory.mjs && node tools/glslcheck.mjs",
+    "accept": "node tools/acceptance.mjs",
+    "shots": "node tools/acceptance.mjs --shots",
+    "watch": "node tools/acceptance.mjs --headful"
+  },
+  "keywords": [
+    "black-hole", "schwarzschild", "raytracer", "geodesic", "glsl", "webgl2",
+    "three.js", "gravitational-lensing", "accretion-disc", "doppler-beaming"
+  ]
+}

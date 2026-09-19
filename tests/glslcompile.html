@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>GARGANTUA — GLSL compile probe</title></head>
+<body>
+<pre id="out">compiling…</pre>
+<script type="module">
+/**
+ * Compiles every GLSL program through the real driver and exposes the raw
+ * logs on window.__PROBE__.
+ *
+ * `chrome --dump-dom` cannot be used to read this: it fires before the modules
+ * finish loading. tools/glslcheck.mjs reads __PROBE__ over CDP instead. The
+ * sources are compiled with exactly the header the pipeline prepends, so a
+ * failure here is a failure in the application.
+ */
+import { sceneFrag } from '../src/shaders/scene.js';
+import {
+  fullscreenVert, prefilterFrag, downsampleFrag, upsampleFrag, compositeFrag,
+} from '../src/shaders/post.js';
+
+/* must match FRAG_HEADER / VERT_HEADER in src/render/pipeline.js */
+const FRAG_HEADER = '#version 300 es\nprecision highp float;\nprecision highp int;\n';
+
+const gl = document.createElement('canvas').getContext('webgl2');
+
+function check(name, type, src) {
+  if (!gl) return { name, ok: false, log: 'no WebGL2 context' };
+  const sh = gl.createShader(type);
+  gl.shaderSource(sh, src);
+  gl.compileShader(sh);
+  const ok = gl.getShaderParameter(sh, gl.COMPILE_STATUS);
+  const log = (gl.getShaderInfoLog(sh) || '').trim();
+  gl.deleteShader(sh);
+  return { name, ok: !!ok, log };
+}
+
+const results = [
+  check('fullscreenVert', gl.VERTEX_SHADER, fullscreenVert),
+  check('sceneFrag', gl.FRAGMENT_SHADER, FRAG_HEADER + sceneFrag),
+  check('prefilterFrag', gl.FRAGMENT_SHADER, FRAG_HEADER + prefilterFrag),
+  check('downsampleFrag', gl.FRAGMENT_SHADER, FRAG_HEADER + downsampleFrag),
+  check('upsampleFrag', gl.FRAGMENT_SHADER, FRAG_HEADER + upsampleFrag),
+  check('compositeFrag', gl.FRAGMENT_SHADER, FRAG_HEADER + compositeFrag),
+];
+
+window.__PROBE__ = { done: true, results, sceneLines: sceneFrag.split('\n').length };
+document.getElementById('out').textContent = JSON.stringify(window.__PROBE__, null, 1);
+</script>
+</body>
+</html>

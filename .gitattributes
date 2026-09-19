@@ -1,0 +1,16 @@
+# Normalise line endings so the published bytes are the bytes that were tested.
+# Without this, a Windows checkout with core.autocrlf rewrites every source file
+# on commit, and the vendored Three.js build gets rewritten too.
+* text=auto eol=lf
+
+# Binary — never touched.
+*.png binary
+*.jpg binary
+*.webp binary
+*.ico binary
+*.woff2 binary
+*.ogg binary
+*.mp3 binary
+
+# Vendored code is byte-for-byte upstream; leave it alone entirely.
+vendor/** -text
